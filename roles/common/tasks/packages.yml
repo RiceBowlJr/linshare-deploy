@@ -1,0 +1,17 @@
+---
+- name: YUM Install some common useful packages
+  yum: pkg={{ item }}
+  with_items: common_packages_list
+  when: ansible_pkg_mgr == "yum"
+  tags:
+      - common
+      - packages
+
+- name: APT Install some common useful packages
+  apt: name={{ item }}
+  with_items: common_packages_list
+  when: ansible_pkg_mgr == "apt"
+  tags:
+      - common
+      - packages
+

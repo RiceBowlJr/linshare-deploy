@@ -1,0 +1,6 @@
+---
+- include: packages.yml
+  when: servlet_container_type == 'tomcat'
+#- include: config.yml
+#  when: servlet_container_type == 'tomcat'
+

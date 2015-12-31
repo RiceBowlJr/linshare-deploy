@@ -1,0 +1,23 @@
+---
+- name: YUM Install Apache httpd (Centos)
+  yum: name={{ item }}
+  with_items:
+    - httpd
+    - mod-ssl
+  when: ansible_pkg_mgr == "yum" and webserver_install == 'True'
+  tags: webserver
+
+- name: APT Install Apache httpd (Debian)
+  apt: name=apache2
+  when: ansible_pkg_mgr == "apt" and webserver_install == 'True'
+  tags: webserver
+
+- name: Enable proxy modules
+  apache2_module: name={{ item }}
+  when: ansible_os_family == "Debian"
+  with_items:
+   - proxy
+   - proxy_http
+   - proxy_connect
+  tags: webserver
+

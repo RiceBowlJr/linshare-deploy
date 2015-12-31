@@ -1,0 +1,19 @@
+---
+- include: include_vars.yml
+- include: libselinux-python.yml
+- include: sudo.yml
+- include: selinux.yml
+- include: locales.yml
+- include: yum.yml
+  when: ansible_pkg_mgr == "yum"
+- include: apt.yml
+  when: ansible_pkg_mgr == "apt"
+- include: flush.yml
+- include: rsyslog.yml
+  when: ansible_pkg_mgr == "yum"
+- include: ntp.yml
+- include: flush.yml
+- include: packages.yml
+- include: hosts.yml
+- include: sysctl.yml
+- include: iptables.yml

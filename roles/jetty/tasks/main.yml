@@ -1,0 +1,5 @@
+---
+- include: packages.yml
+  when: servlet_container_type == 'jetty'
+- include: config.yml
+  when: servlet_container_type == 'jetty'

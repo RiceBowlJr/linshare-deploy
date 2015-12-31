@@ -1,0 +1,61 @@
+---
+ - name: Create Linshare container directory
+   file: >
+     dest=/var/www/linshare
+     state=directory
+     mode=755
+   tags:
+    - linshare-upload
+
+ - name: Download Linshare Upload Request UI archive
+   get_url: >
+     url=http://download.linshare.org/components/linshare-ui-upload-request/stable/{{ upload_version }}/linshare-ui-upload-request-{{ upload_version }}.tar.bz2
+     dest=/tmp/linshare-ui-upload-request-{{ upload_version }}.tar.bz2
+   tags:
+     - linshare-upload
+
+ - name: Unpack LinShare Upload Request UI archive
+   unarchive: >
+     copy=no
+     src=/tmp/linshare-ui-upload-request-{{ upload_version }}.tar.bz2
+     dest=/var/www/linshare/
+     creates=/var/www/linshare/linshare-ui-upload-request-{{ upload_version }}/config.js
+   tags:
+    - linshare-upload
+
+ - name: Create Linshare web Root
+   file: >
+     src=/var/www/linshare/linshare-ui-upload-request-{{ upload_version }}
+     dest=/var/www/linshare/upload-request
+     state=link
+     force=yes
+   tags:
+    - linshare-upload
+
+ - name: Configure LinShare Upload request API endpoint
+   replace: >
+     regexp="backendURL:\s*'linshare'"
+     replace="backendURL: '{{ upload_api_context }}'"
+     dest=/var/www/linshare/upload-request/config.js
+   when: ext_web_url == upload_web_url
+   tags: linshare-upload
+
+ - name: Push LinShare admin Vhost config
+   template: >
+     src=linshare-upload.conf
+     dest={{ webserver_vhost_cfg }}
+     mode=644
+   notify:
+    - Reload Apache httpd
+   tags:
+    - linshare-upload
+
+ - name: Enable LinShare Vhosts
+   file: >
+     path: /etc/apache2/sites-enabled/linshare-upload.conf
+     src: ../sites-available/linshare-upload.conf
+     state=link
+   when: ansible_os_family == 'Debian'
+   tags:
+    - linshare-upload
+

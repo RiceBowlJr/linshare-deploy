@@ -1,0 +1,109 @@
+---
+#
+# Global configuration file
+#
+
+remote_user: root
+
+# Don't remove this line
+config_version: 0.4
+
+#### SSH Configuration ####
+## SSH port needs to be specified if != 22
+## because sync module can't read ~/.ssh/config file
+## It can be overriden on a per-host basis
+## in host_vars/hostname
+#linshare_ssh_port: 22
+
+#### LinShare configuration ####
+
+## LinShare versions
+#linshare_core_version: 1.11.2
+
+## Specify wheter or not you want SSO enabled LinShare
+linshare_use_sso: yes
+#linshare_sso_header: Auth-User
+linshare_sso_web_url: obm3online.fr
+linshare_ext_web_url: share.obm3online.fr
+
+#linshare_admin_version: 2.5.0
+#linshare_admin_web_url:
+#linshare_admin_api_context: linshare
+
+linshare_upload_version: 1.0.3
+linshare_upload_web_url: share.obm3online.fr
+linshare_upload_api_context: api-linshare-upload
+
+## Set clamav config
+linshare_use_clamav: yes
+linshare_install_clamav: yes
+linshare_clamav_host: localhost
+#linshare_clamav_port: 3310
+linshare_clamav_maxfilesize: 10485760
+
+## Should we install the RDBMS?  Usefull if using an already installed server without a package manager
+linshare_db_engine_install: no
+
+## Should we install the webserver?  Usefull if using an already installed server without a package manager
+#linshare_webserver_install: no
+#linshare_webserver_vhost_cfg: /opt/apache2/conf/extra/httpd-vhosts.conf
+
+## Database configuration (either PGSQL or MYSQL) (default: PGSQL)
+#linshare_db_type: PGSQL
+
+## The server hosting the database or the SQL load balancer
+#linshare_db_host: "{{ groups['dbservers'][0] }}"
+
+## The server hosting the database or the master of replication
+#obm_db_master_host: "{{ groups['dbmasters'][0] }}"
+
+## Database configuration
+#linshare_db_user: linshare
+linshare_db_pass: zkecTJ3VS-F5ln
+#linshare_db_name: linshare
+
+#### SSL certificates ####
+## If you need a different certificate for an host or a particular
+## service, you can override ca_file, cert_file and key_file
+## variables in group_vars or host_vars folders.
+##
+## Default values are specified below
+#linshare_ca_file:   /var/lib/obm-ca/cacert.pem
+#linshare_chain_file: /etc/ssl/certs/GandiXXXSSLCA.pem
+linshare_chain_file: /var/lib/obm-ca/cacert.pem
+#linshare_cert_file: /etc/obm/certs/obm_cert.pem
+#linshare_key_file:  /etc/obm/certs/obm_cert.pem
+
+#### Global NTP server (if needed) ####
+## You probably need it if you use mirror mode
+#ntp_server: 192.168.122.1
+
+#### Packages mode (default: internet) ####
+## Allows you to deploy your architecture without internet access
+##
+##  internet : get packages from internet repositories (the default)
+##  mirror   : add all repositories hostnames in /etc/hosts and make
+##             them point to `packages_mirror_ip`.
+##  rsync    : rsync resources/rpm-repos directory and install from it [not implemented yet]
+##
+#packages_mode: internet
+#packages_mirror_ip: 192.168.122.1
+
+#### Proxy Configuration ####
+# Will be deployed on all remote hosts
+#proxy_host:
+#proxy_port:
+#proxy_username:
+#proxy_password:
+
+## Choose wich webapp server to use (tomcat is supported, jetty is on the todo list)
+#servlet_container_type: tomcat
+
+## Set the SMTP server LinShare will use to send notification email
+linshare_smtp_server: smtp.obmonline.dc1
+linshare_smtp_port: 587
+linshare_smtp_auth: true
+linshare_smtp_user: linshare@obm3online.fr
+linshare_smtp_pass: amo5I_ounuz
+
+

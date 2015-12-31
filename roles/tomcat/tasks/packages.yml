@@ -1,0 +1,13 @@
+---
+ - name: Install Tomcat (APT)
+   apt: >
+     name={{ servlet_package_name }}
+   when: ansible_pkg_mgr == "apt"
+   tags: webapp
+
+ - name: Install Tomcat (YUM)
+   yum: >
+     name={{ servlet_package_name }}
+   when: ansible_pkg_mgr == "yum"
+   tags: webapp
+

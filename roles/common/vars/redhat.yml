@@ -1,0 +1,24 @@
+---
+selinux_python_package: "libselinux-python"
+iptables_package: "system-config-firewall-base"
+iptables_services:
+    - iptables
+    - ip6tables
+ntp_service_name: "ntpd"
+common_packages_list:
+    - "{{ iptables_package }}"
+    - vim
+    - mlocate
+    - wget
+    - curl
+    - policycoreutils-python
+    - man
+    - tmux
+    - screen
+    - bind-utils
+    - createrepo
+    - openssl
+    - zip
+    - unzip
+    - mailx
+

@@ -1,0 +1,55 @@
+---
+- name: YUM Install NTP server
+  yum: pkg=ntp
+  when: ansible_pkg_mgr == "yum"
+  notify:
+   - Approximate date using local host
+   - Set approximate system date
+  tags:
+      - common
+      - ntp
+
+- name: APT Install NTP server
+  apt: name=ntp
+  when: ansible_pkg_mgr == "apt"
+  notify:
+   - Approximate date using local host
+   - Set approximate system date
+  tags:
+      - common
+      - ntp
+
+- name: Start NTP server
+  service: name={{ ntp_service_name }} state=started enabled=yes
+  notify:
+   - Update system date
+  tags:
+      - common
+      - ntp
+
+- name: NTP Server configuration cleanup
+  lineinfile: dest=/etc/ntp.conf regexp="server {{ item }}\." state=absent
+  with_items:
+   - 0
+   - 1
+   - 2
+   - 3
+  when: ntp_server is defined
+  notify:
+   - Restart NTP service
+   - Update system date
+  tags:
+      - common
+      - ntp
+
+- name: NTP Server configuration update
+  lineinfile: >
+   dest=/etc/ntp.conf
+   line="server {{ ntp_server }} iburst"
+  notify:
+   - Restart NTP service
+   - Update system date
+  when: ntp_server is defined
+  tags:
+      - common
+      - ntp

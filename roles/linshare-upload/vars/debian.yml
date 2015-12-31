@@ -1,0 +1,3 @@
+---
+webserver_vhost_cfg: /etc/apache2/sites-available/linshare-upload.conf
+webserver_package_name: apache2

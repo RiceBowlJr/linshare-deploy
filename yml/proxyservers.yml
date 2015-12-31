@@ -1,0 +1,9 @@
+---
+- hosts: webservers
+  vars_files:
+    - config.yml
+  roles:
+    - webserver
+    - linshare-ui
+    - linshare-admin
+

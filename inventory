@@ -1,0 +1,32 @@
+[dbservers]
+java01.obmonline.dc1
+
+[webservers]
+web01.obmonline.dc1
+web02.obmonline.dc1
+
+[webappservers]
+java03.obmonline.dc1
+
+[proxyservers]
+proxy01.obmonline.dc1
+proxy02.obmonline.dc1
+
+[databaseservers:children]
+dbservers
+
+# By default the  servlet container has the anitvirus engine installed
+[antivirusservers:children]
+webappservers
+
+# By default the webserver has all Linshare modules installed
+[linshareuiservers:children]
+webservers
+
+[linshareadminservers:children]
+webservers
+
+[linshareuploadservers:children]
+proxyservers
+
+

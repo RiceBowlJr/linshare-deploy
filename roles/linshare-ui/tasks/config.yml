@@ -1,0 +1,25 @@
+---
+ - name: Create Linshare web Root
+   file: >
+     dest=/var/www/linshare/custom
+     state=directory
+   tags:
+    - linshare-ui
+
+ - name: Push LinShare Vhost config
+   template: >
+     src=linshare.conf
+     dest={{ webserver_vhost_cfg }}
+     mode=644
+   tags:
+    - linshare-ui
+
+ - name: Enable LinShare Vhosts
+   file: >
+     path: /etc/apache2/sites-enabled/linshare.conf
+     src: ../sites-available/linshare.conf
+     state=link
+   when: ansible_os_family == 'Debian'
+   tags:
+    - linshare-ui
+

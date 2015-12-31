@@ -1,0 +1,18 @@
+---
+ - name: Install postgres clients (APT)
+   apt: >
+     name={{ item }}
+   when: ansible_pkg_mgr == "apt"
+   with_items:
+    - postgresql-client
+    - openjdk-7-jre-headless
+   tags: webapp
+
+ - name: Install postgres clients (YUM)
+   yum: >
+     name={{ item }}
+   when: ansible_pkg_mgr == "yum"
+   with_items:
+    - postgresql
+    - java-1.7.0-openjdk
+   tags: webapp

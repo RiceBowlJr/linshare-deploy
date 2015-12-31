@@ -1,0 +1,6 @@
+---
+ - include: include_vars.yml
+   when: inventory_hostname in groups.linshareuiservers
+ - include: config.yml
+   when: inventory_hostname in groups.linshareuiservers
+

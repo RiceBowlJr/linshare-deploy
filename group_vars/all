@@ -1,0 +1,81 @@
+---
+# Default variables for all roles
+# Please don't edit this file
+# Use config.yml instead
+
+ansible_become: yes
+ansible_become_user: root
+ansible_become_method: sudo
+
+ssh_port: "{{ linshare_ssh_port | default('22') }}"
+
+core_version: "{{ linshare_core_version | default('1.11.2') }}"
+
+use_sso: "{{ linshare_use_sso | default('no') }}"
+sso_header: "{{ linshare_sso_header | default('Auth-User') }}"
+sso_hosts: "{{ groups['webservers'] | unique }}"
+sso_hosts_list: "{% for sso_host in sso_hosts %}{{ hostvars[sso_host]['ansible_default_ipv4']['address'] }}{% if not loop.last %},{% endif %}{% endfor %}"
+sso_web_url: "{{ linshare_sso_web_url | default(external_url) }}"
+ext_dom_default: share.{{ external_url | default(omit) }}
+ext_web_url: "{{ linshare_ext_web_url | default(ext_dom_default) }}"
+
+admin_version: "{{ linshare_admin_version | default('2.5.0') }}"
+admin_dom_default: linshare-admin.{{ ansible_domain }}
+admin_web_url: "{{ linshare_admin_web_url | default(admin_dom_default) }}"
+admin_api_context: "{{ linshare_admin_api_context | default('linshare') }}"
+
+upload_version: "{{ linshare_upload_version | default('1.0.4') }}"
+upload_web_url: "{{ linshare_upload_web_url | default(ext_web_url) }}"
+upload_api_context: "{{ linshare_upload_api_context | default('linshare') }}"
+
+use_clamav: "{{ linshare_use_clamav | default('no') }}"
+install_clamav: "{{ linshare_install_clamav | default('no') }}"
+clamav_host: "{{ linshare_clamav_host | default(groups['clamavservers'][0]) }}"
+clamav_port: "{{ linshare_clamav_port | default('3310') }}"
+clamav_maxfilesize: "{{ linshare_clamav_maxfilesize | default('50000000') }}"
+
+db_engine_install: "{{ linshare_db_engine_install | default('yes') }}"
+
+webserver_install: "{{ linshare_webserver_install | default('yes') }}"
+webserver_vhost_cfg: "{{ linshare_webserver_vhost_cfg | default('/usr/local/apache2/conf/extra/httpd-vhosts.conf') }}"
+
+db_type: "{{ linshare_db_type | default('PGSQL') }}"
+db_host: "{% if groups['dbservers'] | length > 0 %}{{ linshare_db_host | default(groups['dbservers'][0]) }}{% else %}{{ linshare_db_host | default(groups['databaseservers'][0]) }}{% endif %}"
+db_master_host: "{% if groups['dbmasters'] | length > 0 %}{{ linshare_db_host | default(groups['dbmasters'][0]) }}{% else %}{{ linshare_db_master_host | default(groups['databaseservers'][0]) }}{% endif %}"
+
+db_user: "{{ linshare_db_user | default('linshare') }}"
+db_pass: "{{ linshare_db_pass | default('linshare') }}"
+db_name: "{{ linshare_db_name | default('linshare') }}"
+
+mode: "{{ packages_mode | default('internet') }}"
+
+default_ca_file: '/var/lib/obm-ca/cacert.pem'
+default_cert_file: '/etc/obm/certs/obm_cert.pem'
+
+ca_file: "{{ linshare_ca_file | default('/var/lib/obm-ca/cacert.pem') }}"
+chain_file: "{{ linshare_chain_file | default('/var/lib/obm-ca/cacert.pem') }}"
+cert_file: "{{ linshare_cert_file | default('/etc/obm/certs/obm_cert.pem') }}"
+key_file: "{{ linshare_key_file | default('/etc/obm/certs/obm_cert.pem') }}"
+
+prx_protocol: "{{ proxy_protocol | default('http') }}"
+prx_username: "{{ proxy_username | default('') }}"
+prx_password: "{{ proxy_password | default('') }}"
+prx_host: "{{ proxy_host | default('') }}"
+prx_port: "{{ proxy_port | default('8080') }}"
+prx_acl: "{% if prx_username == '' %}{% else %}{{ prx_username }}:{{ prx_password }}@{% endif %}"
+prx_url: "{% if prx_host == '' %}{% else %}{{ prx_protocol }}://{{ prx_acl }}{{ prx_host }}:{{ prx_port }}/{% endif %}"
+
+proxy_env:
+ http_proxy: "{{ prx_url }}"
+ https_proxy: "{{ prx_url }}"
+ ftp_proxy: "{{ prx_url }}"
+
+servlet_container_type: "{{ linshare_servlet_container_type | default('tomcat') }}"
+servlet_package_name: "{{ (hostvars[inventory_hostname]['ansible_os_family'] == 'Debian') | ternary('tomcat7','tomcat') }}"
+
+smtp_server: "{{ linshare_smtp_server | default('localhost') }}"
+smtp_port: "{{ linshare_smtp_port | default('25') }}"
+smtp_auth: "{{ linshare_smtp_auth | default('false') }}"
+smtp_user: "{{ linshare_smtp_user | default('linshare') }}"
+smtp_pass: "{{ linshare_smtp_pass | default('linshare') }}"
+

@@ -1,0 +1,8 @@
+---
+ - name: Reload Apache httpd
+   service: >
+     name={{ webserver_package_name }}
+     state=reloaded
+   tags:
+    - webserver
+

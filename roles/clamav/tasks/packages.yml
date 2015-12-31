@@ -1,0 +1,22 @@
+---
+ - name: Install clamav daemon (YUM)
+   yum: >
+    name={{ item }}
+   with_items:
+    - clamd
+    - clamav-unofficial-sigs
+   when: ansible_pkg_mgr == 'yum'
+   tags:
+    - antivirus
+
+ - name: Install clamav daemon (APT)
+   apt: >
+    name={{ item }}
+   with_items:
+    - clamav
+    - clamav-freshclam
+    - clamav-unofficial-sigs
+   when: ansible_pkg_mgr == 'apt'
+   tags:
+    - antivirus
+

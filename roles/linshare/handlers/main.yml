@@ -1,0 +1,7 @@
+---
+ - name: Restart Tomcat
+   service: >
+     name={{ servlet_package_name }}
+     state=restarted
+   tags:
+    - webappserver

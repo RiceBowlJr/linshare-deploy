@@ -1,0 +1,7 @@
+---
+- hosts: proxyservers
+  vars_files:
+    - config.yml
+  roles:
+    - linshare-upload
+

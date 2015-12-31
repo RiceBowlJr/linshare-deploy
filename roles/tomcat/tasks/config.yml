@@ -1,0 +1,28 @@
+---
+ - name: Set java alternatives
+   alternatives: >
+     name=java
+     path=/usr/lib/jvm/{{ (servlet_package_name == 'tomcat7') | ternary('java-1.7.0-openjdk-amd64','jre-1.7.0-openjdk.x86_64') }}/bin/java
+   tags: webapp
+   
+ - name: Ensure Tomcat starts on boot
+   service: >
+     name={{ servlet_package_name }}
+     enabled=yes
+     state=stopped
+   tags: webapp
+
+ - name: Restrict Tomcat Connector to localhost
+   replace: >
+     dest=/etc/{{ servlet_package_name }}/server.xml
+     regexp='<Connector\s+(?!address=)'
+     replace='<Connector address="127.0.0.1" '
+     backup=yes
+   when: {{ inventory_hostname }} in groups['webservers']
+   tags: webapp
+
+ - name: Set LinShare JAVA_OPTS
+   lineinfile: >
+     dest={{ (servlet_package_name == 'tomcat7') | ternary('/etc/default/','/etc/sysconfig/') }}{{ servlet_package_name }}
+     line='JAVA_OPTS="${JAVA_OPTS} -XX:MaxPermSize=256m -Djava.awt.headless=true -Xms512m -Xmx1538m -XX:-UseSplitVerifier -Dlinshare.config.path=file:/etc/linshare/ -Dlog4j.configuration=file:/etc/linshare/log4j.properties"'
+

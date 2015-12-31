@@ -1,0 +1,8 @@
+---
+- hosts: webappservers
+  vars_files:
+    - config.yml
+  roles:
+    - jetty
+    - tomcat
+    - linshare

@@ -1,0 +1,40 @@
+---
+ - name: Allow clamd to start at boot time (RedHat)
+   service: >
+     name=clamd
+     enabled=on
+     state=stopped
+   when: ansible_os_family == 'RedHat'
+   tags:
+    - antivirus
+
+ - name: Allow clamd to start at boot time (Debian)
+   service: >
+     name=clamav-daemon
+     enabled=on
+     state=stopped
+   when: ansible_os_family == 'Debian'
+   tags:
+    - antivirus
+
+ - name: Configure TCP/IP interface of Clamav
+   lineinfile: >
+     line="TCPSocket 3310"
+     dest={{ clamav_cfg }}
+   tags:
+    - antivirus
+
+ - name: Configure IP socket of Clamav
+   lineinfile: >
+     line="TCPAddress {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+     dest={{ clamav_cfg }}
+   tags:
+    - antivirus
+
+ - name: Configure Clamav max file size
+   lineinfile: >
+     line="StreamMaxLength {{ clamav_maxfilesize }}"
+     dest={{ clamav_cfg }}
+   tags:
+    - antivirus
+

@@ -1,0 +1,9 @@
+---
+- hosts: databaseservers
+  vars_files:
+    - config.yml
+  vars:
+    db_type: "{{ linshare_db_type | default('PGSQL') }}"
+  roles:
+      - { role: linshare-db-pg, when: "db_type == 'PGSQL'" }
+      #- { role: obm-db-my, when: "db_type == 'MYSQL'" }

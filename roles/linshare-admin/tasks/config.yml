@@ -1,0 +1,52 @@
+---
+ - name: Download Linshare Admin UI archive
+   get_url: >
+     url=http://download.linshare.org/components/linshare-ui-admin/stable/{{ admin_version }}/linshare-ui-admin-{{ admin_version }}.tar.bz2
+     dest=/tmp/linshare-ui-admin-{{ admin_version }}.tar.bz2
+   tags:
+     - linshare-admin
+
+ - name: Unpack LinShare admin UI archive
+   unarchive: >
+     copy=no
+     src=/tmp/linshare-ui-admin-{{ admin_version }}.tar.bz2
+     dest=/var/www/linshare/
+     creates=/var/www/linshare/linshare-ui-admin-{{ admin_version }}/scripts/config.js
+   tags:
+    - linshare-admin
+
+ - name: Create Linshare web Root
+   file: >
+     src=/var/www/linshare/linshare-ui-admin-{{ admin_version }}
+     dest=/var/www/linshare/admin
+     state=link
+     force=yes
+   tags:
+    - linshare-admin
+
+ - name: Configure LinShare Admin API endpoint
+   replace: >
+     regexp="backendURL:\s*'linshare'"
+     replace="backendURL: '{{ admin_api_context }}'"
+     dest=/var/www/linshare/admin/config.js
+   tags: linshare-admin
+
+ - name: Push LinShare admin Vhost config
+   template: >
+     src=linshare-admin.conf
+     dest={{ webserver_vhost_cfg }}
+     mode=644
+   notify:
+    - Reload Apache httpd
+   tags:
+    - linshare-admin
+
+ - name: Enable LinShare Vhosts
+   file: >
+     path: /etc/apache2/sites-enabled/linshare-admin.conf
+     src: ../sites-available/linshare-admin.conf
+     state=link
+   when: ansible_os_family == 'Debian'
+   tags:
+    - linshare-admin
+

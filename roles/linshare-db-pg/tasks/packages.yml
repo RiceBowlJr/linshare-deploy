@@ -1,0 +1,11 @@
+---
+- name: YUM Install PostgreSQL server (Centos)
+  yum: name=postgresql-server
+  when: db_engine_install == "yes" and ansible_distribution == "Centos"
+  tags: postgresql
+
+- name: APT Install PostgreSQL server (Debian)
+  apt: name=postgresql
+  when: db_engine_install == "yes" and ansible_distribution == "Debian"
+  tags: postgresql
+

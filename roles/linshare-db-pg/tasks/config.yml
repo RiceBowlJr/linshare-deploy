@@ -1,0 +1,66 @@
+---
+ - name: Create LinShare DB user
+   postgresql_user: >
+     encrypted=yes
+     name={{ db_user }}
+     password={{ db_pass }}
+   become: yes
+   become_user: postgres
+   become_method: sudo
+   tags:
+    - postgresql
+    - sudoing
+
+ - name: Update pg_hba.conf (Centos)
+   lineinfile: >
+     dest=/var/lib/pgsql/data/pg_hba.conf
+     line="host	{{ db_name }},{{ db_name }}_data	{{ db_user }}	{{ hostvars[item]['ansible_default_ipv4']['address'] }}/32	md5"
+     insertafter="host\s+all\s+all\s+127.0.0.1/32\s+md5"
+   with_items: groups['webappservers']
+   when: ansible_distribution == "Centos"
+   notify: Reload PostgreSQL
+   tags: postgresql
+
+ - name: Update pg_hba.conf (Debian 8)
+   lineinfile: >
+     dest=/etc/postgresql/9.4/main/pg_hba.conf
+     line="host	{{ db_name }},{{ db_name }}_data	{{ db_user }}	{{ hostvars[item]['ansible_default_ipv4']['address'] }}	md5"
+     insertafter="host\s+all\s+all\s+127.0.0.1/32\s+md5"
+   with_items: groups['webappservers']
+   when: ansible_distribution == "Debian" and ansible_distribution_major_version == "8"
+   notify: Reload PostgreSQL
+   tags: postgresql
+
+ - name: Update pg_hba.conf (Debian 7)
+   lineinfile: >
+     dest=/etc/postgresql/9.1/main/pg_hba.conf
+     line="host	{{ db_name }},{{ db_name }}_data	{{ db_user }}	{{ hostvars[item]['ansible_default_ipv4']['address'] }}	md5"
+     insertafter="host\s+all\s+all\s+127.0.0.1/32\s+md5"
+   with_items: groups['webappservers']
+   when: ansible_distribution == "Debian" and ansible_distribution_major_version == "7"
+   notify: Reload PostgreSQL
+   tags: postgresql
+
+ - name: Create LinShare DBs
+   postgresql_db: >
+     name={{ item }}
+     owner={{ db_user }}
+   with_items:
+    - "{{ db_name }}"
+    - "{{ db_name }}_data"
+   become: yes
+   become_user: postgres
+   become_method: sudo
+   tags:
+    - postgresql
+    - sudoing
+
+ - name: (Re)Start Tomcat
+   service: >
+     name={{ servlet_package_name }}
+     state=restarted
+   delegate_to: "{{ groups['webappservers'][0] }}"
+   tags:
+    - webapp
+    - sudoing
+

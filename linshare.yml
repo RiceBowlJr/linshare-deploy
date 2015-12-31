@@ -1,0 +1,9 @@
+---
+# Please don't edit this file
+- include: yml/localhost.yml
+- include: yml/all.yml
+- include: yml/databaseservers.yml
+- include: yml/webappservers.yml
+- include: yml/webservers.yml
+- include: yml/proxyservers.yml
+- include: yml/antivirus.yml

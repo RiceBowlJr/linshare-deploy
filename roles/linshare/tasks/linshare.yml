@@ -1,0 +1,179 @@
+---
+ - name: Download Linshare war file
+   get_url: >
+     url=http://download.linshare.org/components/linshare-core/stable/{{ core_version }}/linshare-core-{{ core_version }}-{%if use_sso == 'no' %}without-{%endif%}SSO.war
+     dest=/var/lib/{{ servlet_package_name }}/webapps/linshare.war
+   tags:
+    - linshare
+
+ - name: Create LinShare directories
+   file: >
+     dest={{ item }}
+     state=directory
+     owner={{ servlet_package_name }}
+     group={{ servlet_package_name }}
+     mode=750
+   with_items:
+    - /etc/linshare
+    - /var/lib/linshare
+   tags:
+    - linshare
+
+ - name: Deploy LinShare config files
+   shell: >
+     unzip -o -j -d /etc/linshare/ linshare.war WEB-INF/classes/{linshare,log4j}.*
+     chdir=/var/lib/{{ servlet_package_name }}/webapps
+   tags:
+    - linshare
+
+ - name: Setup LinShare SMTP server
+   replace: >
+     regexp='^mail.smtp.host=smtp.yourdomain.com$'
+     replace='mail.smtp.host={{ smtp_server }}'
+     dest=/etc/linshare/linshare.properties.sample
+   tags: linshare
+
+ - name: Setup LinShare SMTP port
+   replace: >
+     regexp='^mail.smtp.port=25$'
+     replace='mail.smtp.port={{ smtp_port }}'
+     dest=/etc/linshare/linshare.properties.sample
+   tags: linshare
+
+ - name: Setup LinShare SMTP auth
+   replace: >
+     regexp='^mail.smtp.auth.needed=false$'
+     replace='mail.smtp.auth.needed={{ smtp_auth }}'
+     dest=/etc/linshare/linshare.properties.sample
+   when: smtp_auth == 'True'
+   tags: linshare
+
+ - name: Setup LinShare SMTP username
+   replace: >
+     regexp='^mail.smtp.user=user$'
+     replace='mail.smtp.user={{ smtp_user }}'
+     dest=/etc/linshare/linshare.properties.sample
+   when: smtp_auth == 'True'
+   tags: linshare
+
+ - name: Setup LinShare SMTP password
+   replace: >
+     regexp='^mail.smtp.password=password$'
+     replace='mail.smtp.password={{ smtp_pass }}'
+     dest=/etc/linshare/linshare.properties.sample
+   when: smtp_auth == 'True'
+   tags: linshare
+ 
+ - name: Setup LinShare DB username
+   replace: >
+     regexp='^linshare.db.username=linshare$'
+     replace='linshare.db.username={{ db_user }}'
+     dest=/etc/linshare/linshare.properties.sample
+   tags: linshare
+
+ - name: Setup LinShare DB password
+   replace: >
+     regexp='^linshare.db.password=linshare$'
+     replace='linshare.db.password={{ db_pass }}'
+     dest=/etc/linshare/linshare.properties.sample
+   tags: linshare
+
+ - name: Setup LinShare DB URL
+   replace: >
+     regexp='^linshare.db.url=jdbc:postgresql://localhost:5432/linshare$'
+     replace='linshare.db.url=jdbc:{{ (db_type == 'PGSQL') | ternary('postgresql','mysql') }}://{{ db_host }}/{{ db_name }}'
+     dest=/etc/linshare/linshare.properties.sample
+   tags: linshare
+
+ - name: Setup LinShare DB Dialect
+   replace: >
+     regexp='^linshare.db.dialect=org.hibernate.dialect.PostgreSQLDialect$'
+     replace='linshare.db.dialect=org.hibernate.dialect.MySQL5Dialect'
+     dest=/etc/linshare/linshare.properties.sample
+   when: db_type == "MYSQL"
+   tags: linshare
+
+ - name: Setup LinShare repository
+   replace: >
+     regexp='^linshare.files.directory=/var/lib/linshare/repository$'
+     replace='linshare.files.directory=/var/lib/linshare'
+     dest=/etc/linshare/linshare.properties.sample
+   tags: linshare
+
+ - name: Setup LinShare SSO header
+   replace: >
+     regexp='^sso.header.user=Auth-User$'
+     replace='sso.header.user={{ sso_header }}'
+     dest=/etc/linshare/linshare.properties.sample
+   when: use_sso == 'True'
+   tags: linshare
+
+ - name: Setup LinShare SSO hosts restrictions
+   replace: >
+     regexp='^sso.header.allowfrom=127.0.0.1$'
+     replace='sso.header.allowfrom=127.0.0.1,{{ sso_hosts_list }}'
+     dest=/etc/linshare/linshare.properties.sample
+   when: use_sso == 'True'
+   tags: linshare
+
+ - name: Setup LinShare Clamav host
+   lineinfile: >
+     line=virusscanner.clamav.host={{ clamav_host }}
+     dest=/etc/linshare/linshare.properties.sample
+   when: use_clamav == 'True'
+   tags: linshare
+
+ - name: Setup LinShare Clamav port
+   lineinfile: >
+     line=virusscanner.clamav.port={{ clamav_port }}
+     dest=/etc/linshare/linshare.properties.sample
+   when: use_clamav == 'True'
+   tags: linshare
+
+ - name: Setup LinShare Clamav size limit
+   lineinfile: >
+     line=virusscanner.limit.filesize={{ clamav_maxfilesize }}
+     dest=/etc/linshare/linshare.properties.sample
+   when: use_clamav == 'True'
+   tags: linshare
+
+ - name: Disable license
+   lineinfile: >
+     line=linshare.display.licenceTerm=false
+     dest=/etc/linshare/linshare.properties.sample
+   tags: linshare
+   
+ - name: Move sample file
+   command: >
+     mv /etc/linshare/linshare.properties.sample /etc/linshare/linshare.properties
+   tags: linshare
+
+ - name: Check LinShare DB structure
+   shell: >
+     PGPASSWORD={{ db_pass }} psql -qAt -h {{ db_host }} -U {{ db_user }} -d {{ db_name }} -c "select count(*) from pg_tables where tableowner='{{ db_user }}'"
+   register: wether_dbskel
+   tags:
+    - postgresql
+
+ - name: Check LinShare DB data
+   shell: >
+     PGPASSWORD={{ db_pass }} psql -qAt -h {{ db_host }} -U {{ db_user }} -d {{ db_name }} -c "select count(*) from account where ls_uuid='root@localhost.localdomain'"
+   register: wether_dbdata
+   tags:
+    - postgresql
+
+ - name: Create LinShare DB structure
+   shell: >
+     unzip -c linshare.war WEB-INF/classes/sql/postgresql/createSchema.sql | PGPASSWORD={{ db_pass }} psql -h {{ db_host }} -U {{ db_user }} -d {{ db_name }}
+     chdir=/var/lib/{{ servlet_package_name }}/webapps
+   when: wether_dbskel.stdout == 0
+   tags: postgresql
+
+ - name: Populate LinShare DB
+   shell: >
+     unzip -c linshare.war WEB-INF/classes/sql/postgresql/import-postgresql.sql | PGPASSWORD={{ db_pass }} psql -h {{ db_host }} -U {{ db_user }} -d {{ db_name }}
+     chdir=/var/lib/{{ servlet_package_name }}/webapps
+     creates=/etc/linshare/.db-data_done
+   when: wether_dbdata.stdout == 0
+   tags: postgresql
+
