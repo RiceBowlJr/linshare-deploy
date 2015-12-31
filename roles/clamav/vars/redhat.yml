@@ -1,2 +1,3 @@
 ---
 clamav_cfg: /etc/clamd.conf
+clamav_daemon: clamd
